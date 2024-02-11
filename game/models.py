@@ -9,3 +9,21 @@ class GameName(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class GameUrl(models.Model):
+    url = models.TextField(
+        max_length=300,
+        verbose_name='Ссылка на игру'
+    )
+
+
+class Game(models.Model):
+    name = models.ManyToManyField(
+        GameName,
+        verbose_name='Название игры'
+    )
+    url = models.ManyToManyField(
+        GameUrl,
+        verbose_name='Ссылка на игры'
+    )
