@@ -1,5 +1,7 @@
 from django.db import models
 
+from user.models import User
+
 
 class Game(models.Model):
     name = models.CharField(
@@ -13,4 +15,17 @@ class Game(models.Model):
     url = models.CharField(
         max_length=300,
         verbose_name='Ссылка на игру'
+    )
+
+
+class FavoriteGame(models.Model):
+    game = models.ForeignKey(
+        Game,
+        on_delete=models.CASCADE,
+        verbose_name=''
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name=''
     )
