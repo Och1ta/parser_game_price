@@ -1,8 +1,9 @@
 from django.urls import path
-from . import views
+from .views import search_game, game_detail, add_to_favorite
 
 
 urlpatterns = [
-    path('', views.get_game_name, name='get_game_name'),
-    path('success/', views.success_page_view, name='success_page'),
+    path('', search_game, name='search_game'),
+    path('games/<int:pk>/', game_detail, name='game_detail'),
+    path('games/<int:pk>/add_to_favorite/', add_to_favorite, name='add_to_favorite'),
 ]
