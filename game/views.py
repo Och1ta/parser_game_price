@@ -1,35 +1,36 @@
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden, HttpResponseBadRequest
 from django.shortcuts import render, redirect
 
 from constans import URL_STEAM_SEARCH
 from utils import parser_games_steam
-from .models import Game
+from .models import Game, FavoriteGame
 
 
-def get_game_name(request):
+def search_game(request):
     if request.method == 'POST':
         data_input = request.POST.get('data_input')
-        if not Game.objects.filter(name=data_input).exists():
-            new_data = parser_games_steam(
-                URL_STEAM_SEARCH.format(data_input),
-                data_input
-            )
-            game_data = Game.objects.create(
-                name=new_data[0],
-                price=new_data[1],
-                url=new_data[2]
-            )
-            game_data.save()
-            return redirect('success_page')  # Перенаправляем на страницу успешного сохранения
+        if data_input:
+            if not Game.objects.filter(name=data_input).exists():
+                game_data = parser_games_steam(
+                    URL_STEAM_SEARCH.format(data_input),
+                    data_input
+                )
+                game = Game.objects.create(
+                    name=game_data[0],
+                    price=game_data[1],
+                    url=game_data[2]
+                )
+                game.save()
+            else:
+                game = Game.objects.get(name=data_input)
+            return redirect('game_detail', pk=game.pk)
         else:
-            # Данные уже существуют в базе данных, обработка ошибки или вывод сообщения
-            return render(
-                request,
-                'input_data.html',
-                {'error_message': 'Data already exists!'}
-            )
-
-    return render(request, 'input_data.html')
+            return HttpResponseBadRequest("Название игры не было предоставлено")
+    else:
+        return render(request, 'games/search_game.html')
 
 
-def success_page_view(request):
-    return render(request, 'success_page.html')
+def game_detail(request, pk):
+    game = Game.objects.get(pk=pk)
+    return render(request, 'games/game_detail.html', {'games': game})
