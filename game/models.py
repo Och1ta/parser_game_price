@@ -22,10 +22,13 @@ class FavoriteGame(models.Model):
     game = models.ForeignKey(
         Game,
         on_delete=models.CASCADE,
-        verbose_name=''
+        verbose_name='Любимая игра'
     )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name=''
+        verbose_name='Пользователь'
     )
+
+    def __str__(self):
+        return f"{self.user.username}'s favorite: {self.game.name}"
