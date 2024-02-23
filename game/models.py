@@ -17,6 +17,9 @@ class Game(models.Model):
         verbose_name='Ссылка на игру'
     )
 
+    def __str__(self):
+        return self.name
+
 
 class FavoriteGame(models.Model):
     game = models.ForeignKey(
