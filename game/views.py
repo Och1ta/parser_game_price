@@ -1,9 +1,9 @@
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden, HttpResponseBadRequest
+from django.http import HttpResponseBadRequest
 from django.shortcuts import render, redirect
 
-from constans import URL_STEAM_SEARCH
-from utils import parser_games_steam
+from game.utils import parser_games_steam
+from .constants import URL_STEAM_SEARCH
 from .models import Game, FavoriteGame
 
 
@@ -11,7 +11,10 @@ def search_game(request):
     if request.method == 'POST':
         data_input = request.POST.get('data_input')
         if data_input:
-            if not Game.objects.filter(name=data_input).exists():
+            existing_game = Game.objects.filter(name__iexact=data_input.lower()).first()
+            if existing_game:
+                return redirect('game_detail', pk=existing_game.pk)
+            else:
                 game_data = parser_games_steam(
                     URL_STEAM_SEARCH.format(data_input),
                     data_input
@@ -22,9 +25,7 @@ def search_game(request):
                     url=game_data[2]
                 )
                 game.save()
-            else:
-                game = Game.objects.get(name=data_input)
-            return redirect('game_detail', pk=game.pk)
+                return redirect('game_detail', pk=game.pk)
         else:
             return HttpResponseBadRequest("Название игры не было предоставлено")
     else:
