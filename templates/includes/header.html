@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Parser</title>
+</head>
+<body>
+    <header>
+        <h1>GFinder</h1>
+        <nav>
+            {% if user.is_authenticated %}
+                <ul>
+                    <a href="{% url 'favorite_list' %}">Избранные игры</a>
+                    <a href="{% url 'search_game' %}">Поиск игры</a>
+                </ul>
+                <p>{{ user.username }}</p>
+                <a href="{% url 'logout' %}">Выйти</a>
+            {% else %}
+                <a href="{% url 'login' %}">Войти</a> или <a href="{% url 'registration' %}">Зарегистрироваться</a>
+                <a href="{% url 'search_game' %}">Поиск игры</a>
+            {% endif %}
+        </nav>
+    </header>
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+</html>
