@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}
+    Game Detail
+{% endblock %}
+{% block content %}
+    <meta charset="UTF-8">
+    <title>Game Detail</title>
+<body>
+    <h1>Game Detail</h1>
+    <p>Название игры: {{ games.name }}</p>
+    <p>Цена игры: {{ games.price }}</p>
+    <p>Ссылка на игру: <a href="{{ games.url }}">{{ games.url }}</a></p>
+    {% if request.user.is_authenticated %}
+    <form action="{% url 'add_to_favorite' game_id=games.pk %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Добавить в избранное</button>
+    </form>
+    {% endif %}
+</body>
+{% endblock %}
