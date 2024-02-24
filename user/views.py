@@ -19,7 +19,7 @@ def registration(request):
     else:
         form = CustomUserCreationForm()
     return render(
-        request, 'users/registration.html', {'form': form}
+        request, 'registration/registration_form.html', {'form': form}
     )
 
 
@@ -35,4 +35,4 @@ def login_view(request):
                 return redirect('search_game')
     else:
         form = AuthenticationForm()
-    return render(request, 'users/login.html', {'form': form})
+    return render(request, 'registration/login.html', {'form': form})
