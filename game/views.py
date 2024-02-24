@@ -34,3 +34,17 @@ def search_game(request):
 def game_detail(request, pk):
     game = Game.objects.get(pk=pk)
     return render(request, 'games/game_detail.html', {'games': game})
+
+
+@login_required
+def add_to_favorite(request, game_id):
+    game = Game.objects.get(pk=game_id)
+    favorite = FavoriteGame(user=request.user, game=game)
+    favorite.save()
+    return redirect('game_detail', pk=game_id)
+
+
+@login_required
+def favorite_list(request):
+    favorites = FavoriteGame.objects.filter(user=request.user)
+    return render(request, 'games/favorite_games.html', {'favorites': favorites})
