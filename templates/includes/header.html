@@ -17,8 +17,10 @@
                 <p>{{ user.username }}</p>
                 <a href="{% url 'logout' %}">Выйти</a>
             {% else %}
-                <a href="{% url 'login' %}">Войти</a> или <a href="{% url 'registration' %}">Зарегистрироваться</a>
+              <ul>
                 <a href="{% url 'search_game' %}">Поиск игры</a>
+              </ul>
+              <a href="{% url 'login' %}">Войти</a> или <a href="{% url 'registration' %}">Зарегистрироваться</a>
             {% endif %}
         </nav>
     </header>
