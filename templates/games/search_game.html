@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Поиск Игры</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <label for="data_input">Введите название игры:</label>
+        <input type="text" id="data_input" name="data_input">
+        <button type="submit">Поиск</button>
+    </form>
+{% endblock %}
