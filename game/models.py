@@ -33,5 +33,8 @@ class FavoriteGame(models.Model):
         verbose_name='Пользователь'
     )
 
+    class Meta:
+        unique_together = ('user', 'game')
+
     def __str__(self):
         return f"{self.user.username}'s favorite: {self.game.name}"
