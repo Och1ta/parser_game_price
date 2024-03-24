@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}GFinder{% endblock %}
+{% block content %}
+    <main>
+        <h1>Профиль пользователя {{ user.username }}</h1>
+        <div>
+            <h2>{{ user.username }}</h2>
+        </div>
+        <div>
+            <h2>Игры из списка избранного:</h2>
+            <ul>
+                {% for game_id, game_name in favorite_game_names.items %}
+                    <li><a href="{% url 'game_detail' game_id %}">{{ game_name }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </main>
+{% endblock %}
