@@ -1,11 +1,20 @@
 {% extends "base.html" %}
+
+{% block title %}Gfinder{% endblock %}
+
 {% block content %}
-    <h1>Поиск Игры</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <label for="data_input">Введите название игры:</label>
-        <input type="text" id="data_input" name="data_input">
-        <button type="submit">Поиск</button>
-    </form>
+    <div style="display: flex; justify-content: center; align-items: center; height: 20vh;">
+        <form method="post" style="width: 300px;">
+            {% csrf_token %}
+            <div style="text-align: center; margin-bottom: 10px;">
+                <label for="data_input">Введите название игры:</label><br>
+            </div>
+            <div style="text-align: center; margin-bottom: 10px;">
+                <input type="text" id="data_input" name="data_input" style="width: 100%;">
+            </div>
+            <div style="text-align: center;">
+                <button type="submit">Поиск</button>
+            </div>
+        </form>
+    </div>
 {% endblock %}

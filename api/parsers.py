@@ -21,10 +21,11 @@ def parser_games_steam(url: str, game_name: str):
     game_url = find_url.get('href')
 
     if game_name == game_title.lower():
-        game_price = bs.find(
+        game_price_full = bs.find(
             'div',
             class_='discount_final_price'
-        ).text.strip()
+        ).text.strip().split(' ')
+        game_price = float(game_price_full[0].replace(',', '.'))
         return game_title, game_price, game_url
     else:
         return 'Game not found'
