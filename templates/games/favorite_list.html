@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% block title %}
-    Favorite Games
-{% endblock %}
+
+{% block title %}Favorite Games{% endblock %}
+
 {% block content %}
   <h1>Список избранных игр</h1>
     <ul>
         {% for favorite in favorites %}
-            <li>{{ favorite.game.title }}</li>
+            <li>{{ favorite.game.name }}</li>
         {% endfor %}
     </ul>
 {% endblock %}
