@@ -8,9 +8,19 @@ class Game(models.Model):
         max_length=255,
         verbose_name='Название игры'
     )
-    price = models.CharField(
-        max_length=100,
-        verbose_name='Цена на игру'
+    old_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name='Старая цена',
+        null=True,
+        blank=True
+    )
+    new_price = models.CharField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name='Новая цена',
+        null=True,
+        blank=True
     )
     url = models.CharField(
         max_length=300,
