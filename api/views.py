@@ -1,7 +1,6 @@
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
-from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -10,9 +9,9 @@ from rest_framework.response import Response
 from rest_framework import status, viewsets
 
 from api.serializers import UserSerializer, FavoriteGameSerializer
+from api.parsers import parser_games_steam
 from game.constants import URL_STEAM_SEARCH
 from game.models import Game, FavoriteGame
-from game.utils import parser_games_steam
 from user.models import User
 
 
@@ -96,7 +95,7 @@ class SearchGame(APIView):
                     URL_STEAM_SEARCH.format(name),
                     name
                 )
-                game = Game(name=game_title, price=game_price, url=game_url)
+                game = Game(name=game_title, old_price=game_price, url=game_url)
                 game.save()
                 return redirect('game_detail', pk=game.pk)
             except Exception:
@@ -112,6 +111,13 @@ class GameDetailView(DetailView):
     model = Game
     template_name = 'games/game_detail.html'
     context_object_name = 'game'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        game = self.get_object()
+        if FavoriteGame.objects.filter(user=self.request.user, game=game).exists():
+            context['added_to_favorites'] = True
+        return context
 
 
 class FavoriteGameViewSet(viewsets.ViewSet):
@@ -129,22 +135,29 @@ class FavoriteGameViewSet(viewsets.ViewSet):
             game=game
         )
         if created:
-            return Response(
+            return JsonResponse(
                 {'detail': 'Game added to favorites.'},
                 status=status.HTTP_201_CREATED
             )
         else:
-            return Response(
+            return JsonResponse(
                 {'detail': 'Game already in favorites.'},
                 status=status.HTTP_200_OK
             )
 
-    @action(detail=True, methods=['post'])
+    @action(
+        detail=True,
+        methods=['post']
+    )
     def delete_favorite(self, request, pk=None):
         game = get_object_or_404(Game, pk=pk)
-        favorite_game = get_object_or_404(FavoriteGame, user=request.user, game=game)
+        favorite_game = get_object_or_404(
+            FavoriteGame,
+            user=request.user,
+            game=game
+        )
         favorite_game.delete()
-        return Response(
+        return JsonResponse(
             {'detail': 'Game removed from favorites.'},
             status=status.HTTP_204_NO_CONTENT
         )
