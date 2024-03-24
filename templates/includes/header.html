@@ -1,32 +1,23 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Parser</title>
-</head>
-<body>
-    <header>
-        <h1>GFinder</h1>
-        <nav>
-            {% if user.is_authenticated %}
-                <ul>
-                    <a href="{% url 'favorite_list' %}">Избранные игры</a>
-                    <a href="{% url 'search_game' %}">Поиск игры</a>
-                </ul>
-                <p>{{ user.username }}</p>
-                <a href="{% url 'logout' %}">Выйти</a>
-            {% else %}
-              <ul>
-                <a href="{% url 'search_game' %}">Поиск игры</a>
-              </ul>
-              <a href="{% url 'login' %}">Войти</a> или <a href="{% url 'registration' %}">Зарегистрироваться</a>
-            {% endif %}
-        </nav>
-    </header>
-    <main>
-        {% block content %}
-        {% endblock %}
-    </main>
-</body>
-</html>
+<header>
+  <nav style="display: flex; justify-content: space-between; align-items: center;">
+    {% if user.is_authenticated %}
+      <div style="display: flex; justify-content: center; align-items: center; height: 50px;">
+        <a href="{% url 'search_game' %}" style="margin-right: 10px;">Gfinder</a>
+      </div>
+      <div>
+        <a href="{% url 'user_profile_page' %}"><p style="margin-right: 20px;">{{ user.username }}</p></a>
+        <form action="{% url 'logout' %}" method="post">
+          {% csrf_token %}
+          <button type="submit">Выход из профиля</button>
+        </form>
+      </div>
+    {% else %}
+      <div style="display: flex; align-items: center;">
+        <a href="{% url 'search_game' %}" style="margin-right: 20px;">Gfinder</a>
+      </div>
+      <div>
+        <a href="{% url 'user_login' %}">Войти</a> или <a href="{% url 'user_registration' %}">Регистрация</a>
+      </div>
+    {% endif %}
+    </nav>
+</header>
