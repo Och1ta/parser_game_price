@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="ru">
   <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <title>
-      {% block title %}{% endblock %}
+      {% block title %}GFinder{% endblock %}
     </title>
   </head>
   <body>
     {% include "includes/header.html" %}
-    <main>
-      <div class="container py-5">
-        {% block content %}{% endblock %}
+      <div class="content">
+        {% block content %}
+        {% endblock %}
       </div>
-    </main>
     {% include "includes/footer.html" %}
   </body>
 </html>
