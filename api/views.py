@@ -3,7 +3,7 @@ from djoser.views import UserViewSet
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, mixins
 
 from api.serializers import FavoriteGameSerializer, GameSerializer
 from api.parsers import parser_games_steam
@@ -13,12 +13,13 @@ from user.models import User
 
 
 class CustomUserViewSet(UserViewSet):
-    """ViewSet модели User"""
+    """View set for handling User related operations."""
     queryset = User.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
-class GameViewSet(viewsets.ModelViewSet):
+class GameViewSet(mixins.ListModelMixin,
+                  viewsets.GenericViewSet):
     """View set for handling Game related operations."""
 
     queryset = Game.objects.all()
@@ -27,27 +28,40 @@ class GameViewSet(viewsets.ModelViewSet):
     @action(
         detail=False,
         methods=['post'],
-        url_path='create',
+        url_path='parse_game',
         permission_classes=[IsAdminUser]
     )
-    def create_game(self, request, *args, **kwargs):
+    def parse_game(self, request):
+        """Parse game data from Steam API and add it to the database."""
         game_name = request.data.get('game_name')
         if not game_name:
             return Response(
                 {'error': 'Please provide a game name'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
         try:
-            game_title, game_price, game_url = parser_games_steam(URL_STEAM_SEARCH.format(game_name), game_name)
-            existing_game = Game.objects.filter(name__iexact=game_title.lower()).first()
+            game_title, game_price, game_url = parser_games_steam(
+                URL_STEAM_SEARCH.format(game_name),
+                game_name
+            )
+            existing_game = Game.objects.filter(
+                name__iexact=game_title.lower()
+            ).first()
+
             if existing_game:
                 serializer = self.get_serializer(existing_game)
                 return Response(serializer.data)
+
             else:
-                game = Game(name=game_title, old_price=None, new_price=game_price, url=game_url)
+                game = Game(
+                    name=game_title, old_price=None,
+                    new_price=game_price, url=game_url
+                )
                 game.save()
                 serializer = self.get_serializer(game)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         except Exception:
             return Response(
                 {'error': 'Failed to parse game data'},
@@ -60,7 +74,8 @@ class GameViewSet(viewsets.ModelViewSet):
         url_path='change_price',
         permission_classes=[IsAdminUser]
     )
-    def change_price_game(self, request, *args, **kwargs):
+    def change_price_game(self, request):
+        """Check and update game price from Steam API."""
         game_name = request.data.get('game_name')
 
         if not game_name:
@@ -71,16 +86,15 @@ class GameViewSet(viewsets.ModelViewSet):
 
         try:
             game = Game.objects.get(name__iexact=game_name.lower())
-
             _, new_game_price, _ = parser_games_steam(URL_STEAM_SEARCH.format(game_name), game_name)
 
             if new_game_price != game.new_price:
                 game.old_price = game.new_price
                 game.new_price = new_game_price
                 game.save()
-
                 serializer = self.get_serializer(game)
                 return Response(serializer.data)
+
             else:
                 return Response(
                     {'message': 'Price unchanged'},
@@ -98,7 +112,10 @@ class GameViewSet(viewsets.ModelViewSet):
             )
 
 
-class FavoriteGameViewSet(viewsets.ModelViewSet):
+class FavoriteGameViewSet(mixins.ListModelMixin,
+                          viewsets.GenericViewSet):
+    """View set for handling FavoriteGame related operations."""
+
     queryset = FavoriteGame.objects.all()
     serializer_class = FavoriteGameSerializer
     permission_classes = [IsAuthenticated]
@@ -106,29 +123,37 @@ class FavoriteGameViewSet(viewsets.ModelViewSet):
     @action(
         detail=False,
         methods=['post'],
-        url_path='add_to_favorite'
+        url_path='add'
     )
     def add_to_favorite(self, request):
+        """Add a game to user's favorite list."""
         serializer = self.get_serializer(data=request.data)
+
         if serializer.is_valid():
             serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED
+            )
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     @action(
         detail=False,
         methods=['delete'],
-        url_path='delete_favorite/(?P<game_id>[0-9]+)'
+        url_path='delete/(?P<game_id>[0-9]+)'
     )
     def delete_favorite(self, request, game_id):
-        favorite_game = get_object_or_404(FavoriteGame, user=request.user, game_id=game_id)
+        """Remove a game from user's favorite list."""
+        favorite_game = get_object_or_404(FavoriteGame,
+                                          user=request.user,
+                                          game_id=game_id)
+
         if favorite_game:
             favorite_game.delete()
-            return Response(
-                {'message': 'Game removed from favorites'},
-                status=status.HTTP_204_NO_CONTENT
-            )
-        return Response(
-            {'error': 'Game not found in favorites'},
-            status=status.HTTP_404_NOT_FOUND
-        )
+            return Response({'message': 'Game removed from favorites'},
+                            status=status.HTTP_204_NO_CONTENT)
+        return Response({'error': 'Game not found in favorites'},
+                        status=status.HTTP_404_NOT_FOUND)
