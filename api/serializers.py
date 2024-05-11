@@ -7,7 +7,7 @@ from user.models import User
 class GameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
-        fields = ('pk', 'name', 'price', 'url',)
+        fields = ('pk', 'name', 'old_price', 'new_price', 'url',)
 
 
 class FavoriteGameSerializer(serializers.ModelSerializer):

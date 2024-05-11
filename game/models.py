@@ -15,7 +15,7 @@ class Game(models.Model):
         null=True,
         blank=True
     )
-    new_price = models.CharField(
+    new_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         verbose_name='Новая цена',

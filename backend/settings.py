@@ -2,17 +2,18 @@ import os
 from pathlib import Path
 
 from celery.schedules import crontab
+from django.core.management.utils import get_random_secret_key
 from dotenv import load_dotenv
 
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY', default=get_random_secret_key())
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG', default='False').lower() == 'true'
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='127.0.0.1, localhost').split(', ')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -23,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'djoser',
     'api',
     'game',
     'user',
@@ -96,8 +98,32 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 MEDIA_URL = '/media/'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'user.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGINATE_BY_PARAM': 'limit',
+}
+
+DJOSER = {
+    'SERIALIZERS': {
+        'user': 'api.serializers.UserSerializer',
+        'current_user': 'api.serializers.UserSerializer',
+    },
+    'PERMISSIONS': {
+        'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
+        'user_list': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],
+    },
+    'HIDE_USERS': False,
+    'LOGIN_FIELD': 'email',
+}
